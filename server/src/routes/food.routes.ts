@@ -28,7 +28,7 @@ const router = Router();
  * This is ideal for small-to-medium images being forwarded to a third-party API.
  *
  * Limits:
- *   - File size: 10MB (LogMeal's limit; reduce for cost savings)
+ *   - File size: 10MB (Gemini supports up to 20MB inline)
  *   - Only images accepted (jpeg, png, webp, gif)
  */
 const upload = multer({

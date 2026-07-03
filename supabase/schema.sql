@@ -179,7 +179,7 @@ CREATE TABLE IF NOT EXISTS public.ai_scan_results (
   user_id               UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
   food_log_id           UUID REFERENCES public.food_logs(id) ON DELETE SET NULL,
   image_url             TEXT NOT NULL,    -- Supabase Storage public URL
-  logmeal_response_json JSONB,            -- full raw API response for debugging
+  raw_api_response_json JSONB,            -- full raw API response for debugging (provider-agnostic)
   detected_foods        JSONB,            -- parsed array of detected food items
   confidence_score      NUMERIC(5, 4),    -- overall recognition confidence
   created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()

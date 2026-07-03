@@ -2,14 +2,14 @@
  * food.controller.ts — Food Scan & Food Log Endpoints
  *
  * Handles:
- *   POST /api/food/scan     — AI food recognition via LogMeal
+ *   POST /api/food/scan     — AI food recognition via Google Gemini
  *   GET  /api/food/logs     — Fetch user's food logs
  *   POST /api/food/logs     — Manual food log entry
  *   DELETE /api/food/logs/:id — Delete a food log entry
  */
 import type { Request, Response, NextFunction } from 'express';
 import { supabaseAdmin } from '../config/supabaseClient.js';
-import { analyzeFood } from '../services/logmeal.service.js';
+import { analyzeFood } from '../services/gemini.service.js';
 import { uploadFoodImage } from '../services/storage.service.js';
 import { createError } from '../middleware/errorHandler.js';
 
@@ -21,7 +21,7 @@ import { createError } from '../middleware/errorHandler.js';
  * Complete flow:
  *   1. Receive image from multipart/form-data (via multer)
  *   2. Upload image to Supabase Storage → get public URL
- *   3. Send image buffer to LogMeal API → get nutritional data
+ *   3. Send image buffer to Gemini AI → get nutritional data
  *   4. Insert record into `food_logs` table
  *   5. Insert record into `ai_scan_results` table
  *   6. Return formatted response to frontend
@@ -56,8 +56,8 @@ export async function scanFood(req: Request, res: Response, next: NextFunction):
     const { publicUrl } = await uploadFoodImage(buffer, originalname, userId, mimetype);
     console.log(`[Food Scan] Image stored at: ${publicUrl}`);
 
-    // ── Step 2: Analyze with LogMeal API ─────────────────────────────────────
-    console.log('[Food Scan] Sending to LogMeal API for analysis...');
+    // ── Step 2: Analyze with Google Gemini AI ─────────────────────────────────
+    console.log('[Food Scan] Sending to Gemini AI for analysis...');
     const nutritionData = await analyzeFood(buffer, mimetype);
     console.log(`[Food Scan] Detected: ${nutritionData.foodName} (${nutritionData.calories} kcal, confidence: ${(nutritionData.confidence * 100).toFixed(1)}%)`);
 
@@ -97,7 +97,7 @@ export async function scanFood(req: Request, res: Response, next: NextFunction):
           user_id:              userId,
           food_log_id:          foodLog.id,
           image_url:            publicUrl,
-          logmeal_response_json: nutritionData.rawResponse,
+          raw_api_response_json: nutritionData.rawResponse,
           detected_foods:       nutritionData.detectedFoods,
           confidence_score:     nutritionData.confidence,
         });

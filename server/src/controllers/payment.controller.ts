@@ -60,10 +60,10 @@ export async function createCheckout(req: Request, res: Response, next: NextFunc
     const { error: receiptError } = await supabaseAdmin
       .from('payment_receipts')
       .insert({
-        user_id:        userId,
+        user_id: userId,
         transaction_id: orderId,
-        amount:         MEMBERSHIP_PLANS[plan_id].price,
-        plan_id:        plan_id,          // ← stored for webhook use
+        amount: MEMBERSHIP_PLANS[plan_id].price,
+        plan_id: plan_id,          // ← stored for webhook use
         payment_status: 'pending',
       });
 
@@ -75,10 +75,10 @@ export async function createCheckout(req: Request, res: Response, next: NextFunc
     res.json({
       success: true,
       data: {
-        order_id:     orderId,
-        snap_token:   snapData.token,
+        order_id: orderId,
+        snap_token: snapData.token,
         redirect_url: snapData.redirect_url,
-        plan:         MEMBERSHIP_PLANS[plan_id],
+        plan: MEMBERSHIP_PLANS[plan_id],
       },
     });
   } catch (err) {
@@ -86,17 +86,6 @@ export async function createCheckout(req: Request, res: Response, next: NextFunc
   }
 }
 
-// ─── POST /api/payment/webhook ────────────────────────────────────────────────
-
-/**
- * handleWebhook — Processes Midtrans payment notification.
- *
- * SECURITY: Always verify the signature FIRST before processing.
- * This endpoint must be publicly accessible (no auth middleware).
- *
- * Midtrans will retry the webhook up to 5 times if it doesn't receive HTTP 200.
- * Therefore this handler must be idempotent (safe to call multiple times).
- */
 export async function handleWebhook(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const payload = req.body as MidtransWebhookPayload;
@@ -139,8 +128,8 @@ export async function handleWebhook(req: Request, res: Response, next: NextFunct
       .update({
         payment_status: payload.transaction_status,
         payment_method: payload.payment_type,
-        raw_webhook:    payload,
-        paid_at:        isPaymentSuccessful(payload) ? new Date().toISOString() : null,
+        raw_webhook: payload,
+        paid_at: isPaymentSuccessful(payload) ? new Date().toISOString() : null,
       })
       .eq('id', receipt.id);
 
@@ -161,9 +150,9 @@ export async function handleWebhook(req: Request, res: Response, next: NextFunct
         .single();
 
       const planId = (fullReceipt?.plan_id as string) ?? 'monthly';
-      const plan   = MEMBERSHIP_PLANS[planId] ?? MEMBERSHIP_PLANS['monthly'];
+      const plan = MEMBERSHIP_PLANS[planId] ?? MEMBERSHIP_PLANS['monthly'];
       const startDate = new Date();
-      const endDate   = addMonths(startDate, plan.durationMonths);
+      const endDate = addMonths(startDate, plan.durationMonths);
 
       // Step 1: Update user role to 'member'
       const { error: roleError } = await supabaseAdmin
@@ -190,11 +179,11 @@ export async function handleWebhook(req: Request, res: Response, next: NextFunct
       const { error: membershipError } = await supabaseAdmin
         .from('memberships')
         .insert({
-          user_id:    userId,
-          status:     'active',
-          plan_name:  plan.name,
+          user_id: userId,
+          status: 'active',
+          plan_name: plan.name,
           start_date: format(startDate, 'yyyy-MM-dd'),
-          end_date:   format(endDate, 'yyyy-MM-dd'),
+          end_date: format(endDate, 'yyyy-MM-dd'),
         });
 
       if (membershipError) {

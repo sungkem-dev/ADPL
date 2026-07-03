@@ -30,8 +30,9 @@ export const env = {
   SUPABASE_SERVICE_ROLE_KEY: requireEnv('SUPABASE_SERVICE_ROLE_KEY'),
   SUPABASE_STORAGE_BUCKET: process.env.SUPABASE_STORAGE_BUCKET ?? 'food-images',
 
-  // LogMeal
-  LOGMEAL_API_TOKEN: requireEnv('LOGMEAL_API_TOKEN'),
+  // Google Gemini AI
+  GEMINI_API_KEY: requireEnv('GEMINI_API_KEY'),
+  GEMINI_MODEL: process.env.GEMINI_MODEL ?? 'gemini-2.5-flash',
 
   // Midtrans
   MIDTRANS_SERVER_KEY: requireEnv('MIDTRANS_SERVER_KEY'),
